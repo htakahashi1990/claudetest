@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CLAUDE — Motion Showreel 2026</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; }
+  body { display: grid; place-items: center; overflow: hidden; }
+  canvas { width: min(100vw, 177.78vh); height: auto; display: block; cursor: pointer; }
+  body.render canvas { width: 1920px; height: 1080px; cursor: default; }
+  #hint { position: fixed; bottom: 16px; left: 0; right: 0; text-align: center; color: #F3EFE6;
+          font: 500 13px/1 "Inter", sans-serif; letter-spacing: 3px; opacity: .6; pointer-events: none; }
+  body.render #hint { display: none; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<div id="hint">CLICK / SPACE — PLAY · PAUSE</div>
+<script src="src/reel.js"></script>
+<script>
+  const params = new URLSearchParams(location.search);
+  const canvas = document.getElementById('c');
+  window.READY = REEL.init(canvas).then(() => {
+    if (params.has('render')) { document.body.classList.add('render'); return; }
+    // realtime preview, synced to the soundtrack when present
+    const audio = new Audio('dist/soundtrack.wav');
+    let playing = false, t0 = 0, offset = 0;
+    const now = () => (playing ? (audio.readyState >= 2 && !audio.paused ? audio.currentTime : offset + (performance.now() - t0) / 1000) : offset);
+    function toggle() {
+      if (playing) { offset = now(); playing = false; audio.pause(); return; }
+      if (offset >= REEL.DUR - 0.01) offset = 0;
+      playing = true; t0 = performance.now(); audio.currentTime = offset; audio.play().catch(() => {});
+    }
+    canvas.addEventListener('click', toggle);
+    addEventListener('keydown', (e) => { if (e.code === 'Space') { e.preventDefault(); toggle(); } });
+    (function loop() {
+      let t = now();
+      if (t >= REEL.DUR) { playing = false; offset = REEL.DUR - 1e-3; t = offset; audio.pause(); }
+      REEL.drawFrame(t, 1);
+      requestAnimationFrame(loop);
+    })();
+  });
+</script>
+</body>
+</html>
