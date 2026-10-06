@@ -50,3 +50,43 @@ node tools/render.cjs --stills 1.5,3.2,12.6
 - `tools/render.cjs` — ヘッドレスChromiumで各フレームを描画し、ffmpegへ直接パイプしてエンコード
 - `tools/soundtrack.py` — サウンドトラックのシンセサイザー
 - `dist/` — 完成した映像・音声・コンタクトシート
+
+---
+
+# OVERWATCH — ファンメイド・コンセプトプロモ（非公式）
+
+**24秒 / 1920×1080 / 60fps / 120 BPM** — 上のショーリールと同じエンジン・同じテイストで作った、FPSゲーム「OVERWATCH」のプロモーション映像のコンセプト。
+
+▶ **[dist/overwatch-promo.mp4](dist/overwatch-promo.mp4)**
+
+![overwatch contact sheet](dist/overwatch-contact-sheet.jpg)
+
+> **非公式のファン作品です。** Blizzard Entertainment とは一切関係がなく、承認も受けていません。公式ロゴ・キャラクターデザイン・ヒーロー名・公式キャッチコピーは使用しておらず、ヒーローのシルエット、名前（ATLAS / NOVA / RONIN など）、ロールアイコン、武器、コピーはすべてオリジナルの代替表現です。
+
+## 構成（1小節 = 2秒）
+
+| # | 時間 | シーン | 内容 |
+|---|------|--------|------|
+| 01 | 0:00 | **MATCH FOUND** | 点がローディングリングになり、「MATCH FOUND」がスラム |
+| 02 | 0:02 | **ROLES** | TANK ×1 / DAMAGE ×2 / SUPPORT ×2 のカードが拍ごとに着地 |
+| 03 | 0:04 | **VERSUS** | 味方5人 vs 敵5人のラインナップ。**集団戦直前**の睨み合い |
+| 04 | 0:06 | **SPAWN** 🎮 | **一人称視点**。スポーンルームで味方と並び、3・2・1カウントダウン → ドアが開く |
+| 05 | 0:08 | **FIRST PICK** 🎮 | **一人称視点で射撃**。飛び降りてきた敵とカバー裏の敵を撃破（ヒットマーカー、ダメージ数値、キルフィード） |
+| 06 | 0:10 | **THE MOMENT BEFORE** | 同じマップの戦術俯瞰図。両チームが配置につき「TEAMFIGHT IN 3・2・1」 — **集団戦直前** |
+| 07 | 0:12 | **TEAMFIGHT** 🎮 | 「ENGAGE」。被弾 → 味方サポートの回復 → 撃ち返して撃破 → ULTIMATE READY |
+| 08 | 0:14 | **ULTIMATE** 🎮 | スローモーションで4体をロックオン → 一斉射撃 → TEAM KILL |
+| 09 | 0:16 | **NO HERO FIGHTS ALONE.** | キネティックタイポグラフィ |
+| 10 | 0:18 | **VICTORY** | グリッチモンタージュ → VICTORY |
+| 11 | 0:20 | **END** | タイトル、「JOIN THE FIGHT」、非公式表記。最後はCRTオフ → 点 → クロスヘアで締め |
+
+🎮 = 一人称視点のゲームプレイシーン。軽量な自作3Dエンジン（Canvas 2D、ペインターズアルゴリズム、ニアクリップ、太陽光＋フォグ）で、スポーンルームからアリーナまで1つの連続したマップとしてレンダリングしています。
+
+```bash
+python3 tools/overwatch_soundtrack.py   # → dist/overwatch-soundtrack.wav
+node tools/render.cjs --page overwatch.html --audio dist/overwatch-soundtrack.wav --out dist/overwatch-promo.mp4
+python3 -m http.server 8000             # → http://localhost:8000/overwatch.html でリアルタイム再生
+```
+
+- `src/overwatch.js` — プロモ本体（3Dエンジン、HUD、全シーン）
+- `tools/overwatch_soundtrack.py` — 銃声、カウントダウン、ドア、ロックオン、爆発まで含むサウンドトラック
+- `tools/synth.py` — 2作品で共有できるシンセ部品

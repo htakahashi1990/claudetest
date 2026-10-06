@@ -24,7 +24,7 @@
   window.READY = REEL.init(canvas).then(() => {
     if (params.has('render')) { document.body.classList.add('render'); return; }
     // realtime preview, synced to the soundtrack when present
-    const audio = new Audio('dist/soundtrack.wav');
+    const audio = new Audio(REEL.audio || 'dist/soundtrack.wav');
     let playing = false, t0 = 0, offset = 0;
     const now = () => (playing ? (audio.readyState >= 2 && !audio.paused ? audio.currentTime : offset + (performance.now() - t0) / 1000) : offset);
     function toggle() {

@@ -5,6 +5,7 @@
  *
  *   node tools/render.cjs                         # full reel → dist/showreel.mp4
  *   node tools/render.cjs --stills 0.5,2.9,...    # PNG stills → dist/stills/
+ *   node tools/render.cjs --page overwatch.html --audio dist/overwatch-soundtrack.wav --out dist/overwatch-promo.mp4
  *
  * Options: --samples N (motion-blur sub-frames, default 8)  --workers N (default 4)
  */
@@ -18,15 +19,17 @@ const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? proces
 const SAMPLES = +arg('--samples', 8);
 const WORKERS = +arg('--workers', 4);
 const STILLS = arg('--stills', null);
+const STILL_DIR = arg('--still-dir', path.join(ROOT, 'dist/stills'));
 const OUT = arg('--out', path.join(ROOT, 'dist/showreel.mp4'));
 const AUDIO = arg('--audio', path.join(ROOT, 'dist/soundtrack.wav'));
+const PAGE = arg('--page', 'index.html');
 
 async function openPage(browser) {
   const ctx = await browser.newContext({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
   const page = await ctx.newPage();
   page.on('console', (m) => { if (m.type() === 'error') console.error('[page]', m.text()); });
   page.on('pageerror', (e) => console.error('[pageerror]', e.message));
-  await page.goto('file://' + path.join(ROOT, 'index.html') + '?render');
+  await page.goto('file://' + path.join(ROOT, PAGE) + '?render');
   await page.evaluate(() => window.READY);
   return page;
 }
@@ -40,7 +43,7 @@ async function grab(page, t, samples) {
   const browser = await chromium.launch({ args: ['--force-color-profile=srgb', '--font-render-hinting=none'] });
   if (STILLS) {
     const page = await openPage(browser);
-    const dir = path.join(ROOT, 'dist/stills');
+    const dir = STILL_DIR;
     fs.mkdirSync(dir, { recursive: true });
     for (const s of STILLS.split(',')) {
       const t = +s;
@@ -51,8 +54,8 @@ async function grab(page, t, samples) {
     return;
   }
 
-  const fps = 60, total = 900;
   const pages = await Promise.all(Array.from({ length: WORKERS }, () => openPage(browser)));
+  const { fps, total } = await pages[0].evaluate(() => ({ fps: REEL.FPS, total: REEL.frames }));
   const hasAudio = fs.existsSync(AUDIO);
   const ff = spawn('ffmpeg', [
     '-y', '-loglevel', 'error',
